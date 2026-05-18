@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lembaga Pembiayaan – Kelompok 7</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ─── VARIABLES ─── */
+  :root {
+    --bg: #090d1a;
+    --surface: #0f1628;
+    --card: #141d35;
+    --border: rgba(100,140,255,0.18);
+    --accent: #4f8aff;
+    --gold: #f5c542;
+    --text: #e8eeff;
+    --muted: #8899cc;
+    --white: #ffffff;
+    --shadow: rgba(79,138,255,0.15);
+    --atom-core: #4f8aff;
+    --atom-ring: #7bbfff;
+  }
+  [data-theme="light"] {
+    --bg: #f0f4ff;
+    --surface: #ffffff;
+    --card: #e8eeff;
+    --border: rgba(60,100,220,0.18);
+    --accent: #2660e8;
+    --gold: #c8900a;
+    --text: #12193a;
+    --muted: #5566aa;
+    --white: #ffffff;
+    --shadow: rgba(40,80,200,0.12);
+    --atom-core: #2660e8;
+    --atom-ring: #4f8aff;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background 0.4s, color 0.4s;
+  }
+
+  /* ─── THEME TOGGLE ─── */
+  #theme-btn {
+    position: fixed;
+    top: 18px;
+    right: 22px;
+    z-index: 9999;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    font-size: 1.3rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 18px var(--shadow);
+    transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+  }
+  #theme-btn:hover { transform: scale(1.12) rotate(20deg); box-shadow: 0 6px 24px var(--shadow); }
+
+  /* ═══════════════════════════════════════
+     INTRO SCREEN
+  ═══════════════════════════════════════ */
+  #intro {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    gap: 20px;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  #intro.fade-out { opacity: 0; transform: scale(1.04); pointer-events: none; }
+
+  /* Atom */
+  .atom-wrap {
+    width: 160px;
+    height: 160px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .atom-nucleus {
+    width: 26px;
+    height: 26px;
+    background: radial-gradient(circle, #fff 20%, var(--atom-core));
+    border-radius: 50%;
+    box-shadow: 0 0 24px 6px var(--atom-core);
+    position: absolute;
+    z-index: 2;
+    animation: pulse-core 2s ease-in-out infinite;
+  }
+  @keyframes pulse-core {
+    0%,100% { box-shadow: 0 0 24px 6px var(--atom-core); transform: scale(1); }
+    50% { box-shadow: 0 0 40px 14px var(--atom-core); transform: scale(1.12); }
+  }
+  .orbit {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid var(--atom-ring);
+  }
+  .orbit::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: var(--atom-ring);
+    border-radius: 50%;
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 10px 3px var(--atom-ring);
+  }
+  .orbit-1 { width: 100px; height: 100px; animation: spin1 2.2s linear infinite; }
+  .orbit-2 { width: 130px; height: 60px; animation: spin2 2.8s linear infinite; }
+  .orbit-3 { width: 60px; height: 130px; animation: spin3 3.5s linear infinite; }
+  @keyframes spin1 { to { transform: rotate(360deg); } }
+  @keyframes spin2 { to { transform: rotate(-360deg); } }
+  @keyframes spin3 { to { transform: rotate(360deg); } }
+
+  .intro-group {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    text-shadow: 0 0 30px rgba(79,138,255,0.5);
+    animation: glow-text 2s ease-in-out infinite;
+  }
+  @keyframes glow-text {
+    0%,100% { text-shadow: 0 0 20px rgba(79,138,255,0.4); }
+    50% { text-shadow: 0 0 40px rgba(79,138,255,0.9); }
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    width: min(320px, 85vw);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+  .progress-label {
+    font-size: 0.85rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .progress-track {
+    width: 100%;
+    height: 6px;
+    background: var(--card);
+    border-radius: 99px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+    border-radius: 99px;
+    transition: width 0.05s linear;
+    box-shadow: 0 0 10px var(--accent);
+  }
+  .progress-pct {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--gold);
+  }
+
+  /* ═══════════════════════════════════════
+     MAIN DASHBOARD
+  ═══════════════════════════════════════ */
+  #main { display: none; }
+  #main.visible { display: block; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 80px 24px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 50% at 50% 30%, rgba(79,138,255,0.13) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2rem, 6vw, 4.5rem);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    line-height: 1.1;
+    background: linear-gradient(135deg, var(--accent) 30%, var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+    animation: fadeUp 0.8s ease both;
+  }
+  .hero-subtitle {
+    font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+    color: var(--muted);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 50px;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Members grid */
+  .members-section {
+    width: 100%;
+    max-width: 900px;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+  .members-label {
+    font-size: 0.78rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 22px;
+  }
+  .members-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: center;
+  }
+  .member-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 26px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 120px;
+    animation: float 3.5s ease-in-out infinite;
+    box-shadow: 0 6px 24px var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    cursor: default;
+  }
+  .member-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 10px 36px var(--shadow);
+    transform: translateY(-6px) scale(1.04) !important;
+  }
+  .member-card:nth-child(1) { animation-delay: 0s; }
+  .member-card:nth-child(2) { animation-delay: 0.4s; }
+  .member-card:nth-child(3) { animation-delay: 0.8s; }
+  .member-card:nth-child(4) { animation-delay: 1.2s; }
+  .member-card:nth-child(5) { animation-delay: 1.6s; }
+  @keyframes float {
+    0%,100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  .member-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(79,138,255,0.35);
+  }
+  .member-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text);
+    letter-spacing: 0.05em;
+  }
+  .member-role {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .scroll-hint {
+    margin-top: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.15em;
+    animation: bounce 2s ease-in-out infinite, fadeUp 1s 0.8s ease both;
+  }
+  .scroll-arrow {
+    font-size: 1.3rem;
+    animation: bounce 1.4s ease-in-out infinite;
+  }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(6px); }
+  }
+
+  /* ─── SLIDES SECTION ─── */
+  .slides-section {
+    padding: 40px 20px 80px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .slides-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .slides-header h2 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+  .slides-header p { color: var(--muted); font-size: 0.9rem; letter-spacing: 0.1em; }
+
+  /* Slide viewer */
+  .slide-viewer {
+    position: relative;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 12px 50px rgba(0,0,0,0.3);
+  }
+
+  /* Tab nav */
+  .slide-tabs {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1.5px solid var(--border);
+    background: var(--card);
+  }
+  .slide-tabs::-webkit-scrollbar { display: none; }
+  .slide-tab {
+    padding: 14px 22px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .slide-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .slide-tab:hover:not(.active) { color: var(--text); }
+  .tab-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .slide-tab.active .tab-dot { opacity: 1; }
+
+  /* Slide track */
+  .slides-track {
+    position: relative;
+    overflow: hidden;
+    transition: height 0.45s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* Slide content */
+  .slide-content {
+    position: absolute;
+    top: 0; left: 0; width: 100%;
+    padding: clamp(24px, 5vw, 48px);
+    opacity: 0;
+    transform: translateX(110%);
+    transition: transform 0.52s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease;
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+  .slide-content.active {
+    position: relative;
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+  }
+  .slide-content.exit-left {
+    position: absolute;
+    opacity: 0;
+    transform: translateX(-110%) !important;
+    pointer-events: none;
+  }
+  .slide-content.exit-right {
+    position: absolute;
+    opacity: 0;
+    transform: translateX(110%) !important;
+    pointer-events: none;
+  }
+  .slide-content.enter-from-left {
+    transform: translateX(-110%);
+    opacity: 0;
+  }
+
+  .slide-presenter {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .presenter-badge {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--gold));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(79,138,255,0.3);
+  }
+  .presenter-info h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .presenter-info span {
+    font-size: 0.78rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .slide-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.2rem, 3vw, 1.7rem);
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 18px;
+    line-height: 1.25;
+  }
+  .slide-body {
+    color: var(--text);
+    font-size: clamp(0.88rem, 2vw, 0.97rem);
+    line-height: 1.85;
+  }
+  .slide-body p { margin-bottom: 14px; }
+  .slide-body strong { color: var(--accent); font-weight: 600; }
+
+  /* Feature list */
+  .feature-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .feature-list li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .feature-list li:hover { border-color: var(--accent); transform: translateX(4px); }
+  .feat-icon {
+    color: var(--gold);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .feat-text strong {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .feat-text span { font-size: 0.83rem; color: var(--muted); line-height: 1.5; }
+
+  /* Highlight box */
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(79,138,255,0.1), rgba(245,197,66,0.07));
+    border: 1.5px solid rgba(79,138,255,0.25);
+    border-radius: 14px;
+    padding: 18px 22px;
+    margin: 18px 0;
+  }
+  .highlight-box .hb-title {
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .highlight-box p { font-size: 0.9rem; color: var(--muted); line-height: 1.7; margin: 0; }
+
+  /* Timeline */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 16px;
+  }
+  .tl-item {
+    display: flex;
+    gap: 16px;
+    position: relative;
+  }
+  .tl-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 36px;
+  }
+  .tl-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid var(--bg);
+    box-shadow: 0 0 10px var(--accent);
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+  .tl-line {
+    width: 2px;
+    flex: 1;
+    background: var(--border);
+    margin: 4px 0;
+  }
+  .tl-item:last-child .tl-line { display: none; }
+  .tl-body {
+    padding-bottom: 20px;
+  }
+  .tl-body strong {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+  .tl-body span { font-size: 0.82rem; color: var(--muted); line-height: 1.55; }
+
+  /* Slide nav buttons */
+  .slide-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px clamp(24px, 5vw, 48px);
+    border-top: 1.5px solid var(--border);
+    background: var(--card);
+  }
+  .slide-nav-btn {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    padding: 9px 20px;
+    border-radius: 99px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.05em;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  }
+  .slide-nav-btn:hover { background: var(--card); border-color: var(--accent); transform: scale(1.03); }
+  .slide-nav-btn:disabled { opacity: 0.3; pointer-events: none; }
+  .slide-counter {
+    font-size: 0.82rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+  .slide-dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .sdot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .sdot.active { background: var(--accent); transform: scale(1.4); }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    text-align: center;
+    padding: 30px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Particle background */
+  #particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+    animation: particle-float linear infinite;
+  }
+  @keyframes particle-float {
+    0% { opacity: 0; transform: translateY(100vh) scale(0); }
+    10% { opacity: 0.4; }
+    90% { opacity: 0.15; }
+    100% { opacity: 0; transform: translateY(-10vh) scale(1.5); }
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
+    .members-grid { gap: 10px; }
+    .member-card { padding: 12px 18px; min-width: 100px; }
+    .slide-content { padding: 22px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Particle BG -->
+<div id="particles"></div>
+
+<!-- Theme Toggle -->
+<button id="theme-btn" title="Toggle Theme">🌙</button>
+
+<!-- ═══ INTRO ═══ -->
+<div id="intro">
+  <div class="atom-wrap">
+    <div class="atom-nucleus"></div>
+    <div class="orbit orbit-1"></div>
+    <div class="orbit orbit-2"></div>
+    <div class="orbit orbit-3"></div>
+  </div>
+  <div class="intro-group">KELOMPOK 7</div>
+  <div class="progress-wrap">
+    <div class="progress-label">Memuat Materi…</div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="progress-pct" id="progress-pct">0%</div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div id="main">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-title">LEMBAGA PEMBIAYAAN</div>
+    <div class="hero-subtitle">Modal Ventura · Kelompok 7 · Ekonomi</div>
+
+    <div class="members-section">
+      <div class="members-label">Anggota Kelompok</div>
+      <div class="members-grid">
+        <div class="member-card">
+          <div class="member-avatar">G</div>
+          <div class="member-name">Geisha</div>
+          <div class="member-role">Proses Kerja</div>
+        </div>
+        <div class="member-card">
+          <div class="member-avatar">B</div>
+          <div class="member-name">Boy</div>
+          <div class="member-role">Sejarah</div>
+        </div>
+        <div class="member-card">
+          <div class="member-avatar">R</div>
+          <div class="member-name">Ricarson</div>
+          <div class="member-role">Karakteristik</div>
+        </div>
+        <div class="member-card">
+          <div class="member-avatar">D</div>
+          <div class="member-name">Diki</div>
+          <div class="member-role">Pihak Terlibat</div>
+        </div>
+        <div class="member-card">
+          <div class="member-avatar">N</div>
+          <div class="member-name">Nikolas</div>
+          <div class="member-role">Pengantar</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-hint">
+      <span>GULIR KE BAWAH</span>
+      <span class="scroll-arrow">↓</span>
+    </div>
+  </section>
+
+  <!-- SLIDES -->
+  <section class="slides-section">
+    <div class="slides-header">
+      <h2>Materi Presentasi</h2>
+      <p>Klik tab untuk berpindah antar materi</p>
+    </div>
+
+    <div class="slide-viewer">
+      <!-- Tabs -->
+      <div class="slide-tabs" id="slide-tabs">
+        <button class="slide-tab active" data-slide="0"><span class="tab-dot"></span>01 · Pengantar</button>
+        <button class="slide-tab" data-slide="1"><span class="tab-dot"></span>02 · Karakteristik</button>
+        <button class="slide-tab" data-slide="2"><span class="tab-dot"></span>03 · Sejarah</button>
+        <button class="slide-tab" data-slide="3"><span class="tab-dot"></span>04 · Proses Kerja</button>
+        <button class="slide-tab" data-slide="4"><span class="tab-dot"></span>05 · Pihak Terlibat</button>
+      </div>
+
+      <div class="slides-track" id="slides-track">
+
+      <!-- ══ Slide 0: Nikolas – Pengantar ══ -->
+      <div class="slide-content active" id="slide-0">
+        <div class="slide-presenter">
+          <div class="presenter-badge">N</div>
+          <div class="presenter-info">
+            <h3>NIKOLAS</h3>
+            <span>Pemateri · Pengantar Modal Ventura</span>
+          </div>
+        </div>
+        <div class="slide-title">Apa Itu Modal Ventura?</div>
+        <div class="slide-body">
+          <p>Modal ventura adalah bentuk <strong>pembiayaan investasi berisiko tinggi</strong> oleh perusahaan (PMV) kepada perusahaan rintisan (startup) atau UMKM yang potensial, melalui penyertaan modal saham atau obligasi konversi.</p>
+          <p>Tujuannya adalah membantu pengembangan usaha dengan imbalan kepemilikan saham, di mana investor (modal ventura) berharap mendapatkan <strong>keuntungan besar (return)</strong> saat perusahaan sukses.</p>
+        </div>
+        <div class="highlight-box">
+          <div class="hb-title">💡 Mengapa Modal Ventura Penting?</div>
+          <p>Modal ventura menjadi salah satu sumber pendanaan utama bagi startup dan UMKM yang sulit mengakses pinjaman bank karena belum memiliki aset jaminan maupun rekam jejak keuangan yang mapan. Melalui skema penyertaan modal (ekuitas), risiko dan keuntungan ditanggung bersama antara PMV dan perusahaan penerima dana.</p>
+        </div>
+        <div class="highlight-box">
+          <div class="hb-title">🏢 Contoh Perusahaan Modal Ventura di Indonesia (Data OJK)</div>
+          <p>Berdasarkan data OJK, beberapa perusahaan modal ventura yang aktif di Indonesia antara lain: <strong>MBK Ventura, MCI (Mandiri Capital Indonesia), BRI Ventures,</strong> dan <strong>PNM Venture Capital.</strong> Perusahaan-perusahaan ini aktif mendanai startup dan UMKM lokal yang berpotensi tinggi di berbagai sektor industri.</p>
+        </div>
+      </div>
+
+      <!-- ══ Slide 1: Ricarson – Karakteristik ══ -->
+      <div class="slide-content" id="slide-1">
+        <div class="slide-presenter">
+          <div class="presenter-badge">R</div>
+          <div class="presenter-info">
+            <h3>RICARSON</h3>
+            <span>Pemateri · Karakteristik Modal Ventura</span>
+          </div>
+        </div>
+        <div class="slide-title">Karakteristik Utama Modal Ventura</div>
+        <div class="slide-body">
+          <p>Modal ventura memiliki sejumlah karakteristik yang membedakannya dari instrumen pembiayaan lain seperti pinjaman bank atau obligasi biasa. Berikut adalah ciri-ciri utamanya:</p>
+        </div>
+        <ul class="feature-list">
+          <li>
+            <span class="feat-icon">💼</span>
+            <div class="feat-text">
+              <strong>Penyertaan Modal (Ekuitas / Saham)</strong>
+              <span>Pembiayaan diberikan bukan berupa pinjaman biasa, melainkan penyertaan langsung dalam bentuk ekuitas (saham). Artinya, PMV menjadi bagian dari pemilik perusahaan, bukan sekadar pemberi utang yang harus dibayar beserta bunga.</span>
+            </div>
+          </li>
+          <li>
+            <span class="feat-icon">⚡</span>
+            <div class="feat-text">
+              <strong>Investasi Berisiko Tinggi (High Risk, High Return)</strong>
+              <span>Modal ventura umumnya diberikan kepada startup yang belum memiliki rekam jejak keuangan stabil namun memiliki potensi pertumbuhan cepat. Risikonya tinggi, namun imbal hasilnya pun bisa sangat besar jika perusahaan berhasil tumbuh dan berkembang pesat.</span>
+            </div>
+          </li>
+          <li>
+            <span class="feat-icon">📅</span>
+            <div class="feat-text">
+              <strong>Jangka Waktu Panjang</strong>
+              <span>Investasi bersifat sementara namun berjangka panjang, biasanya di atas 3 tahun, hingga startup tumbuh dan stabil. Setelah mencapai target pertumbuhan, modal ventura akan menarik kembali modalnya (exit) melalui mekanisme yang telah disepakati sebelumnya.</span>
+            </div>
+          </li>
+          <li>
+            <span class="feat-icon">🤝</span>
+            <div class="feat-text">
+              <strong>Pendampingan Manajemen Aktif</strong>
+              <span>Selain menyuntikkan uang tunai, perusahaan modal ventura sering kali memberikan bimbingan manajemen, saran strategis, dan jaringan bisnis yang luas. Ini membuat modal ventura lebih dari sekadar investor pasif — mereka turut berperan dalam pertumbuhan usaha.</span>
+            </div>
+          </li>
+          <li>
+            <span class="feat-icon">🏛️</span>
+            <div class="feat-text">
+              <strong>Sasaran Utama: Perusahaan Swasta (Belum Go Public)</strong>
+              <span>Modal ventura menargetkan perusahaan swasta yang tidak tercatat di bursa efek (belum go public / IPO). Setelah perusahaan berkembang dan siap melantai di bursa, itulah momen PMV keluar (exit) dan merealisasikan keuntungannya.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- ══ Slide 2: Boy – Sejarah ══ -->
+      <div class="slide-content" id="slide-2">
+        <div class="slide-presenter">
+          <div class="presenter-badge">B</div>
+          <div class="presenter-info">
+            <h3>BOY</h3>
+            <span>Pemateri · Sejarah Modal Ventura</span>
+          </div>
+        </div>
+        <div class="slide-title">Sejarah & Tokoh Pendiri Modal Ventura Modern</div>
+        <div class="slide-body">
+          <p>Tokoh yang dianggap sebagai <strong>Bapak Modal Ventura Modern</strong> adalah <strong>Georges Doriot</strong>, seorang profesor terkemuka di Harvard Business School. Berikut adalah perjalanan sejarah terbentuknya industri modal ventura:</p>
+        </div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-body">
+              <strong>🎓 Pelopor Utama – Georges Doriot</strong>
+              <span>Georges Doriot, profesor Harvard Business School, bersama <em>Ralph Flanders</em> dan <em>Karl Compton</em> mendirikan <strong>American Research and Development Corporation (ARDC)</strong> pada tahun 1946. ARDC menjadi perusahaan modal ventura pertama yang bersifat publik di dunia.</span>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-body">
+              <strong>🎯 Tujuan Awal Pendirian ARDC</strong>
+              <span>ARDC didirikan dengan tujuan utama memfasilitasi investasi swasta di perusahaan-perusahaan rintisan, khususnya yang dijalankan oleh <em>veteran Perang Dunia II</em> yang memiliki ide bisnis dan teknologi inovatif namun kekurangan modal untuk memulai usaha.</span>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-body">
+              <strong>🚀 Keberhasilan Pertama – 1957</strong>
+              <span>Kesuksesan besar pertama ARDC adalah investasinya pada <strong>Digital Equipment Corporation (DEC)</strong> pada tahun 1957. Investasi ini bernilai sangat tinggi saat DEC melakukan IPO, membuktikan bahwa model pembiayaan modal ventura bisa menghasilkan return yang luar biasa.</span>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-body">
+              <strong>💡 Tokoh Lain – John Hay Whitney</strong>
+              <span>Tokoh keuangan <strong>John Hay Whitney</strong> juga diyakini sebagai salah satu orang yang memelopori dan mempopulerkan istilah <em>"venture capital"</em> (modal petualangan) untuk mendeskripsikan pembiayaan berisiko tinggi guna mendukung para pengusaha pemula yang penuh inovasi.</span>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-body">
+              <strong>📌 Kesimpulan Sejarah</strong>
+              <span>Secara ringkas, industri modal ventura modern dimulai di <strong>Amerika Serikat</strong> pada pertengahan tahun 1940-an dengan fokus pada pembiayaan perusahaan rintisan berisiko tinggi yang memiliki potensi pertumbuhan besar. Kini model ini telah berkembang ke seluruh dunia, termasuk Indonesia.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ Slide 3: Geisha – Proses Kerja ══ -->
+      <div class="slide-content" id="slide-3">
+        <div class="slide-presenter">
+          <div class="presenter-badge">G</div>
+          <div class="presenter-info">
+            <h3>GEISHA</h3>
+            <span>Pemateri · Proses Kerja Modal Ventura</span>
+          </div>
+        </div>
+        <div class="slide-title">Proses Kerja Modal Ventura</div>
+        <div class="slide-body">
+          <p>Proses kerja modal ventura melibatkan pengumpulan dana dari investor, penyaringan startup potensial, investasi ekuitas, pendampingan manajemen, dan <strong>exit strategy</strong> dalam jangka waktu 5–10 tahun. Investor menukar dana dengan saham, menanggung risiko tinggi, dan mengharapkan keuntungan besar dari pertumbuhan nilai perusahaan — bukan dari bunga pinjaman.</p>
+        </div>
+        <ul class="feature-list">
+          <li>
+            <span class="feat-icon">💰</span>
+            <div class="feat-text">
+              <strong>1. Pengumpulan Dana (Fundraising)</strong>
+              <span>Perusahaan modal ventura (PMV) mengumpulkan modal dari berbagai investor seperti investor institusi, <em>corporate investor</em>, atau individu kaya (<em>limited partners</em>) untuk membentuk dana investasi yang akan disalurkan ke startup-startup potensial.</span>
+            </div>
+          </li>
+          <li>
+            <span class="feat-icon">🔍</span>
+            <div class="feat-text">
+              <strong>2. Pencarian & Seleksi (Sourcing & Screening)</strong>
+              <span>Investor aktif mencari startup dengan potensi pertumbuhan tinggi, inovasi teknologi yang kuat, dan tim manajemen yang solid. Tahap ini melibatkan proses <em>pitching</em> oleh startup dan seleksi ketat dari sisi PMV untuk menyaring yang paling potensial.</span>
+            </div>
+          </li>
+          <li>
+            <span class="feat-icon">📋</span>
+            <div class="feat-text">
+              <strong>3. Uji Tuntas (Due Diligence)</strong>
+              <span>Sebelum memutuskan berinvestasi, PMV melakukan pemeriksaan mendalam (<em>due diligence</em>) terhadap berbagai aspek startup: legalitas hukum, kondisi keuangan, keunggulan teknologi, model bisnis, dan kekuatan tim. Ini adalah tahap paling kritis untuk meminimalisir risiko.</span>
+            </div>
+          </li>
+          <li>
+            <span class="feat-icon">✍️</span>
+            <div class="feat-text">
+              <strong>4. Investasi & Negosiasi (Investment)</strong>
+              <span>Jika startup dinyatakan lolos seleksi dan due diligence, kontrak investasi ditandatangani oleh kedua belah pihak dan modal resmi disuntikkan ke startup sebagai imbalan atas kepemilikan saham (ekuitas) dengan persentase yang telah disepakati.</span>
+            </div>
+          </li>
+          <li>
+            <span class="feat-icon">📈</span>
+            <div class="feat-text">
+              <strong>5. Pendampingan (Value Addition)</strong>
+              <span>PMV tidak hanya berperan sebagai penyandang dana, tetapi juga aktif terlibat dalam manajemen startup. Mereka memberikan bimbingan strategis, membuka akses jaringan bisnis yang luas, serta berbagi keahlian di bidang operasional, pemasaran, dan keuangan untuk mempercepat pertumbuhan.</span>
+            </div>
+          </li>
+          <li>
+            <span class="feat-icon">🚀</span>
+            <div class="feat-text">
+              <strong>6. Tahapan Pendanaan (Funding Stages)</strong>
+              <span>Pembiayaan dilakukan secara bertahap sesuai kematangan startup: dimulai dari <em>pre-seed</em>, <em>seed</em>, lalu berlanjut ke <em>Seri A, B, C,</em> dan seterusnya. Setiap tahap mencerminkan tingkat pertumbuhan dan kebutuhan dana startup yang semakin besar.</span>
+            </div>
+          </li>
+          <li>
+            <span class="feat-icon">🏁</span>
+            <div class="feat-text">
+              <strong>7. Keluar (Exit Strategy)</strong>
+              <span>Investor menarik kembali modal beserta keuntungannya dalam rentang waktu 5–10 tahun. Mekanisme exit dilakukan melalui <em>Initial Public Offering (IPO)</em>, proses merger dengan perusahaan lain, atau akuisisi oleh perusahaan yang lebih besar.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- ══ Slide 4: Diki – Pihak Terlibat ══ -->
+      <div class="slide-content" id="slide-4">
+        <div class="slide-presenter">
+          <div class="presenter-badge">D</div>
+          <div class="presenter-info">
+            <h3>DIKI</h3>
+            <span>Pemateri · Pihak-Pihak yang Terlibat</span>
+          </div>
+        </div>
+        <div class="slide-title">Pihak-Pihak yang Terlibat dalam Modal Ventura</div>
+        <div class="slide-body">
+          <p>Dalam ekosistem modal ventura, terdapat beberapa pihak yang memiliki peran dan fungsi masing-masing. Keempat pihak ini saling berkaitan dan bekerja sama untuk menjalankan mekanisme pembiayaan modal ventura secara efektif:</p>
+        </div>
+        <ul class="feature-list">
+          <li>
+            <span class="feat-icon">🏢</span>
+            <div class="feat-text">
+              <strong>Perusahaan Modal Ventura (PMV) / Venture Capital Firm</strong>
+              <span>Badan usaha yang melakukan penyertaan modal atau memberikan bantuan dana (seringkali berupa ekuitas atau saham) kepada perusahaan pasangan usaha. PMV bertindak sebagai pengelola dana (<em>fund management</em>) atau penyedia dana dari modal sendiri (<em>investee management</em>). PMV adalah jantung dari ekosistem modal ventura karena menghubungkan pemilik modal dengan perusahaan yang membutuhkan pendanaan.</span>
+            </div>
+          </li>
+          <li>
+            <span class="feat-icon">🌱</span>
+            <div class="feat-text">
+              <strong>Perusahaan Pasangan Usaha (PPU) / Investee Company</strong>
+              <span>Startup, UMKM, koperasi, atau perusahaan rintisan yang menerima pendanaan dari PMV. PPU biasanya memiliki potensi pertumbuhan tinggi namun juga memiliki risiko yang tinggi karena masih dalam tahap awal pengembangan. PPU memberikan imbal balik berupa kepemilikan saham (ekuitas) kepada PMV sebagai ganti atas dana yang diterima.</span>
+            </div>
+          </li>
+          <li>
+            <span class="feat-icon">👤</span>
+            <div class="feat-text">
+              <strong>Investor / Penyandang Dana (Limited Partners)</strong>
+              <span>Pihak yang menanamkan modal pada perusahaan modal ventura untuk dikelola dan disalurkan ke berbagai startup potensial. Investor bisa berupa: <em>individu kaya (angel investors)</em>, lembaga keuangan seperti bank, perusahaan asuransi, dan dana pensiun, serta badan pemerintah yang mendorong pertumbuhan ekosistem wirausaha nasional.</span>
+            </div>
+          </li>
+          <li>
+            <span class="feat-icon">🎯</span>
+            <div class="feat-text">
+              <strong>Mitra Umum (General Partners – GPs)</strong>
+              <span>Manajer atau pengelola profesional perusahaan modal ventura yang memiliki tanggung jawab penuh dalam menjalankan operasional PMV sehari-hari. GP bertugas: mencari peluang investasi yang menjanjikan, melakukan <em>due diligence</em> (uji tuntas) secara menyeluruh, serta memberikan pendampingan dan bimbingan manajemen secara aktif kepada PPU agar berkembang optimal.</span>
+            </div>
+          </li>
+        </ul>
+        <div class="highlight-box" style="margin-top:20px;">
+          <div class="hb-title">🔗 Hubungan Antar Pihak</div>
+          <p><strong>Investor (LP)</strong> → menyetor dana ke → <strong>PMV</strong> → yang dikelola oleh → <strong>General Partners (GP)</strong> → untuk diinvestasikan ke → <strong>PPU (Startup/UMKM)</strong>. Keuntungan dari pertumbuhan PPU kemudian mengalir kembali ke PMV dan didistribusikan kepada para investor sesuai proporsi yang disepakati.</p>
+        </div>
+      </div>
+
+      </div><!-- /slides-track -->
+
+      <!-- Nav -->
+      <div class="slide-nav">
+        <button class="slide-nav-btn" id="prev-btn" disabled>← Sebelumnya</button>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <div class="slide-dots" id="slide-dots"></div>
+          <div class="slide-counter" id="slide-counter">Slide 1 / 5</div>
+        </div>
+        <button class="slide-nav-btn" id="next-btn">Selanjutnya →</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    © 2026 Kelompok 7 · Lembaga Pembiayaan · Modal Ventura
+  </footer>
+</div>
+
+<script>
+  /* ─── PARTICLES ─── */
+  (function(){
+    const c = document.getElementById('particles');
+    for(let i=0;i<22;i++){
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const sz = Math.random()*4+2;
+      p.style.cssText = `
+        width:${sz}px;height:${sz}px;
+        left:${Math.random()*100}%;
+        animation-duration:${8+Math.random()*12}s;
+        animation-delay:${-Math.random()*15}s;
+      `;
+      c.appendChild(p);
+    }
+  })();
+
+  /* ─── THEME ─── */
+  const btn = document.getElementById('theme-btn');
+  let dark = true;
+  btn.addEventListener('click', ()=>{
+    dark = !dark;
+    document.documentElement.setAttribute('data-theme', dark?'dark':'light');
+    btn.textContent = dark ? '🌙' : '☀️';
+  });
+
+  /* ─── PROGRESS / INTRO ─── */
+  const fill = document.getElementById('progress-fill');
+  const pct  = document.getElementById('progress-pct');
+  const intro = document.getElementById('intro');
+  const main  = document.getElementById('main');
+  let prog = 0;
+  const iv = setInterval(()=>{
+    prog += Math.random()*0.9 + 0.4;
+    if(prog >= 100){
+      prog = 100;
+      clearInterval(iv);
+      fill.style.width = '100%';
+      pct.textContent = '100%';
+      setTimeout(()=>{
+        intro.classList.add('fade-out');
+        setTimeout(()=>{
+          intro.style.display = 'none';
+          main.classList.add('visible');
+        }, 850);
+      }, 500);
+    } else {
+      fill.style.width = prog + '%';
+      pct.textContent = Math.floor(prog) + '%';
+    }
+  }, 60);
+
+  /* ─── SLIDES ─── */
+  const tabs    = document.querySelectorAll('.slide-tab');
+  const slides  = document.querySelectorAll('.slide-content');
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  const counter = document.getElementById('slide-counter');
+  const dotsWrap = document.getElementById('slide-dots');
+  const total = slides.length;
+  let current = 0;
+
+  // Build dots
+  for(let i=0;i<total;i++){
+    const d = document.createElement('div');
+    d.className = 'sdot' + (i===0?' active':'');
+    d.addEventListener('click', ()=> goTo(i));
+    dotsWrap.appendChild(d);
+  }
+
+  const track = document.getElementById('slides-track');
+  let isAnimating = false;
+
+  function setTrackHeight(slideEl) {
+    track.style.height = slideEl.scrollHeight + 'px';
+  }
+
+  function goTo(idx){
+    if(isAnimating || idx === current) return;
+    isAnimating = true;
+    const dir = idx > current ? 'forward' : 'backward';
+    const outSlide = slides[current];
+    const inSlide  = slides[idx];
+
+    // Set track height to current slide before transition
+    track.style.height = outSlide.scrollHeight + 'px';
+
+    // Prep incoming slide off-screen (no transition yet)
+    inSlide.style.transition = 'none';
+    inSlide.classList.remove('active','exit-left','exit-right','enter-from-left');
+    inSlide.style.transform = dir === 'forward' ? 'translateX(110%)' : 'translateX(-110%)';
+    inSlide.style.opacity = '0';
+    inSlide.style.position = 'absolute';
+
+    // Force reflow
+    inSlide.getBoundingClientRect();
+
+    // Re-enable transitions
+    inSlide.style.transition = '';
+    inSlide.style.transform = '';
+    inSlide.style.opacity   = '';
+
+    // Animate out current
+    outSlide.classList.remove('active');
+    outSlide.classList.add(dir === 'forward' ? 'exit-left' : 'exit-right');
+
+    // Animate in new slide
+    inSlide.classList.add('active');
+
+    // Update tabs & dots
+    tabs[current].classList.remove('active');
+    dotsWrap.children[current].classList.remove('active');
+    current = idx;
+    tabs[current].classList.add('active');
+    dotsWrap.children[current].classList.add('active');
+    counter.textContent = `Slide ${current+1} / ${total}`;
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total-1;
+    tabs[current].scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+
+    // After transition: clean up exited slide, update track height
+    setTimeout(()=>{
+      outSlide.classList.remove('exit-left','exit-right');
+      outSlide.style.position = '';
+      setTrackHeight(inSlide);
+      isAnimating = false;
+    }, 560);
+  }
+
+  tabs.forEach((t, i) => t.addEventListener('click', ()=> goTo(i)));
+  prevBtn.addEventListener('click', ()=> { if(current>0) goTo(current-1); });
+  nextBtn.addEventListener('click', ()=> { if(current<total-1) goTo(current+1); });
+
+  // Keyboard nav
+  document.addEventListener('keydown', e=>{
+    if(e.key==='ArrowRight' && current<total-1) goTo(current+1);
+    if(e.key==='ArrowLeft' && current>0) goTo(current-1);
+  });
+
+  // Init counter
+  counter.textContent = `Slide 1 / ${total}`;
+  prevBtn.disabled = true;
+
+  // Init track height
+  setTimeout(()=> setTrackHeight(slides[0]), 50);
+</script>
+</body>
+</html>
